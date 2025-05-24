@@ -1,30 +1,22 @@
-# 💽 Disk Space Alert – DevOps Automation Project #3
+# 💽 Disk Space Alert – DevOps Automation Project
 
-Un semplice sistema di **monitoraggio automatico dello spazio disco** con **notifica via email gratuita** usando `Bash`, `cron` e `msmtp`.
-
-Progetto utile in ambienti DevOps/SysAdmin per garantire che i sistemi non vadano in blocco per mancanza di spazio.
+Questo progetto Bash monitora lo spazio disco del filesystem root (`/`) e invia una notifica via email se l’utilizzo supera una soglia configurabile (default 80%). Il controllo avviene automaticamente ogni giorno tramite `cron`.
 
 ---
 
-## 🧠 Obiettivo
+## 📁 Struttura del progetto
 
-- Monitorare lo spazio del filesystem root `/`
-- Loggare lo stato ogni 24 ore
-- Inviare una notifica email se lo spazio supera una soglia critica (default: **80%**)
-
----
-
-## 🗂️ Struttura del progetto
-
+```
 devops-automation-disk/
-├── check_disk.sh # Script principale di monitoraggio
-├── disk_alert.log # Log automatico giornaliero
-├── README.md # Questo file
-
+├── check_disk.sh         # Script principale
+├── disk_alert.log        # Log automatico giornaliero
+├── .gitignore            # Esclude file di log dal repo
+├── README.md             # Questo file
+```
 
 ---
 
-## 🔧 Script principale – `check_disk.sh`
+## 🔧 Script – `check_disk.sh`
 
 ```bash
 #!/bin/bash
@@ -40,19 +32,19 @@ if [ "$USAGE" -ge "$THRESHOLD" ]; then
 else
     echo "[$DATE] OK - Disco al ${USAGE}%" >> "$LOG_FILE"
 fi
+```
 
+---
 
+## 🛠️ Configurazione Email (msmtp + Gmail)
 
-📬 Configurazione Email (msmtp + Gmail)
-
-# Installa msmtp
-
-sudo apt update
+1. Installa `msmtp`:
+```bash
 sudo apt install msmtp msmtp-mta -y
+```
 
-
-## Crea il file ~/.msmtprc
-
+2. Crea `~/.msmtprc`:
+```ini
 defaults
 auth on
 tls on
@@ -65,36 +57,61 @@ port 587
 from TUA_EMAIL@gmail.com
 user TUA_EMAIL@gmail.com
 password "LA_TUA_APP_PASSWORD"
-
 account default : gmail
+```
 
-
-### Proteggi il file
-
+3. Proteggi il file:
+```bash
 chmod 600 ~/.msmtprc
+```
 
+4. Testa:
+```bash
+echo "Test notifica" | msmtp TUA_EMAIL@gmail.com
+```
 
+---
 
-🕒 Automazione con cron
-Per schedulare lo script una volta al giorno (es. alle 8:00):
+## 🕒 Automatizzazione con cron
 
-cron
+Per eseguire il check ogni giorno alle 08:00:
 
+```cron
 0 8 * * * /home/<user>/devops-automation-disk/check_disk.sh
+```
 
-Modifica il tuo crontab
+Aggiungilo al tuo crontab con:
+```bash
+crontab -e
+```
 
-✅ Output previsto
+---
 
-In disk_alert.log:
+## 📄 Output esempio
 
+Nel file `disk_alert.log`:
+```
 [2025-05-24 08:00:00] OK - Disco al 45%
 [2025-05-25 08:00:00] ⚠️ Disco sopra 80%: attuale 91%
+```
 
-Notifica email:
-
-Oggetto: (nessuno)
-Contenuto:
+Email:
+```
 Attenzione: lo spazio su disco ha superato la soglia.
 Utilizzo attuale: 91%
- 
+```
+
+---
+
+## 👨‍💻 Tecnologie usate
+
+- Bash
+- Cron
+- msmtp + Gmail App Password
+- comandi: `df`, `awk`, `sed`
+
+---
+
+## 👤 Autore
+
+[Emanuele Alessio](https://github.com/emanuelealessio)
